@@ -1,0 +1,49 @@
+          
+
+#UUID utility lib
+#source: https://gist.github.com/markusfisch/6110640
+#0 1 2 3  4 5  6 7  8 9  0
+#56101C42-A28A-C74A-B28E-262300873EC6 # Standard
+#5b4e7734-bfd8-477b-a3a0-132e6f830221 # this uuid
+
+#https://en.wikipedia.org/wiki/Universally_unique_identifier
+#123e4567-e89b-12d3-a456-426655440000
+#xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
+#The four bits of digit M indicate the UUID version,
+#and the one to three most significant bits of digit N indicate the UUID variant. 
+
+#usage: uuid [-n]
+
+function uuid() {
+  local argn=$#
+  local new_line=0
+  local i
+  local b
+  local V='89ab' # Variant 1 UUIDs (digit N) :: the first 2 bits are '10' an the last 2 bits are random
+  while [ $argn -gt 0 ]; do
+    case "$1" in
+      '-n') new_line=1 ;;
+      *) echo "Unkown option: $1"; exit 1; ;;
+    esac
+    shift 1; ((argn--))
+  done
+  for ((i=0; i<16; ++i))
+  do
+    b=$(( $RANDOM % 256 ))
+    case $i in
+      6) printf '4%x' $(( b % 16 )) # M=4 -> Version 4 UUID (random)
+        ;;
+      8) printf '%c%x' ${V: $RANDOM % ${#V} :1} $(( b % 16 )) # ${PARAMETER:OFFSET:LENGTH} and ${#PARAMETER} the length 
+        ;;
+      3 | 5 | 7 | 9)
+        printf '%02x-' $b
+        ;;
+      *)
+        printf '%02x' $b
+        ;;
+    esac
+  done
+  [ $new_line -gt 0 ] && echo
+}
+
+   
